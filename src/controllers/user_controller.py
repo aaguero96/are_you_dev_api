@@ -8,15 +8,16 @@ from dtos import (
     LoginResponseDTO,
 )
 from errors import BadRequestError
+from fastapi import status, Response
 
 
 class IUserController(ABC):
     @abstractmethod
-    def create(self, request: CreateUserRequestDTO) -> CreateUserResponseDTO:
+    def create(self, request: CreateUserRequestDTO, response: Response) -> CreateUserResponseDTO:
         pass
 
     @abstractmethod
-    def login(self, request: LoginRequestDTO) -> LoginResponseDTO:
+    def login(self, request: LoginRequestDTO, response: Response) -> LoginResponseDTO:
         pass
 
 
@@ -24,7 +25,7 @@ class UserController(IUserController):
     def __init__(self, user_service: IUserService) -> None:
         self._user_service = user_service
 
-    def create(self, request: CreateUserRequestDTO) -> CreateUserResponseDTO:
+    def create(self, request: CreateUserRequestDTO, response: Response) -> CreateUserResponseDTO:
         user = UserModel(
             email=request.email,
             username=request.username,
@@ -34,7 +35,7 @@ class UserController(IUserController):
         response = self._user_service.create(user)
         return CreateUserResponseDTO(token=response)
     
-    def login(self, request: LoginRequestDTO) -> LoginResponseDTO:
+    def login(self, request: LoginRequestDTO, response: Response) -> LoginResponseDTO:
         if request.email == "" and request.username == "":
             raise BadRequestError("inform email or username to login")
         

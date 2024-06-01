@@ -2,7 +2,7 @@ from infra import DatabaseConfig, EnvConfig, JwtConfig
 from repositories import UserRepository
 from services import UserService
 from controllers import UserController
-from routes import UserRoute, SwaggerConfig
+from routes import UserRoute, SwaggerConfig, ErrorHandlerConfig
 from fastapi import FastAPI
 import uvicorn
 
@@ -36,6 +36,9 @@ def main():
     # swagger
     swagger_config = SwaggerConfig(app)
     swagger_config.apply()
+
+    # error handlers
+    ErrorHandlerConfig(app)
     
     # start api
     uvicorn.run(app, host=env_config.get_env("HOST"), port=int(env_config.get_env("PORT")))
