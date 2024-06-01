@@ -38,7 +38,7 @@ def main():
     swagger_config.apply()
     
     # start api
-    uvicorn.run(app, host="localhost", port=3000)
+    uvicorn.run(app, host="localhost", port=int(env_config.get_env("PORT")))
 
 
 main()
