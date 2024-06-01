@@ -14,7 +14,7 @@ def main():
     jwt_config = JwtConfig(env_config)
 
     # start database
-    if env_config.get_env("ENV") == "develop":
+    if env_config.get_env("ENV") == "development":
         database_config.create_tables()
 
     # repositories
