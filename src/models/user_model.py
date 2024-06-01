@@ -8,8 +8,8 @@ class UserModel(BaseModel):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(name="id", type_=UUID(as_uuid=True), primary_key=True, server_default=expression.func.uuid_generate_v4())
-    email: Mapped[str] = mapped_column(name="email", type_=String)
-    username: Mapped[str] = mapped_column(name="username", type_=String)
+    email: Mapped[str] = mapped_column(name="email", type_=String, unique=True)
+    username: Mapped[str] = mapped_column(name="username", type_=String, unique=True)
     password: Mapped[str] = mapped_column(name="password", type_=String)
     birthdate: Mapped[Date] = mapped_column(name="birthdate", type_=Date)
     created_at: Mapped[DateTime] = mapped_column(name="created_at", type_=DateTime, server_default=expression.func.now())
