@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from pydantic import BaseModel, field_validator
 from validators import email_validator
 from errors import BadRequestError
@@ -26,4 +26,3 @@ class CreateUserRequestDTO(BaseModel):
 
 class CreateUserResponseDTO(BaseModel):
     token: str
-    expires_in: str

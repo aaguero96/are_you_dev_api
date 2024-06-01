@@ -22,4 +22,4 @@ class UserController(IUserController):
             birthdate=request.birthdate,
         )
         response = self._user_service.create(user)
-        return CreateUserResponseDTO(token=response, expires_in="")
+        return CreateUserResponseDTO(token=response)

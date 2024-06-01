@@ -1,5 +1,5 @@
 # generated files
-venv
+.venv
 __pycache__
 
 # environment
