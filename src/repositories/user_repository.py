@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from infra import IDatabaseConfig
 from models import UserModel
-from sqlalchemy import select
-from sqlalchemy.exc import NoResultFound
-from errors import NotFoundError
+from sqlalchemy import select, insert
+from sqlalchemy.exc import NoResultFound, IntegrityError
+from errors import NotFoundError, ConflictError
 
 
 class IUserRepository(ABC):
@@ -25,9 +25,26 @@ class UserRepository(IUserRepository):
         self._session = database_config.session()
 
     def create(self, user: UserModel) -> UserModel:
-        self._session.add(user)
-        self._session.commit()
-        return user
+        try:
+            response = self._session.execute(
+                insert(UserModel).values({
+                    "email": user.email,
+                    "username": user.username,
+                    "password": user.password,
+                    "birthdate": user.birthdate,
+                }).returning(UserModel)
+            )
+            self._session.commit()
+            created_user = response.fetchone()
+            return created_user[0]
+        except IntegrityError as err:
+            self._session.rollback()
+            if 'unique constraint' in str(err.orig):
+                raise ConflictError("user has already been created", err)
+            raise err
+        except ValueError as err:
+            self._session.rollback()
+            raise err
 
     def get_by_username(self, username: str) -> UserModel:
         try:
