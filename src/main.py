@@ -10,7 +10,7 @@ import uvicorn
 def main():
     # infra
     env_config = EnvConfig()
-    database_config = DatabaseConfig()
+    database_config = DatabaseConfig(env_config)
     jwt_config = JwtConfig(env_config)
 
     # start database
@@ -38,7 +38,7 @@ def main():
     swagger_config.apply()
     
     # start api
-    uvicorn.run(app, host="localhost", port=int(env_config.get_env("PORT")))
+    uvicorn.run(app, host=env_config.get_env("HOST"), port=int(env_config.get_env("PORT")))
 
 
 main()

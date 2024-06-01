@@ -10,3 +10,13 @@ services:
       - POSTGRES_DB=test
     ports:
       - 5432:5432
+
+  api:
+    container_name: api
+    build: .
+    env_file:
+      - ./.env
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
