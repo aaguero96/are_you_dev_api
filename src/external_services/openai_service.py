@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from openai import OpenAI
 from infra import IEnvConfig
-from errors import ConflictError, InternalServerError
-import re
+from errors import ConflictError, InternalServerError, BadRequestError
+import json
 
 
 class IOpenAiService(ABC):
     @abstractmethod
-    def validate_question(question: str, existing_questions_json: str) -> str:
+    def validate_question(description: str, existing_questions_json: str) -> str:
         pass
 
 
@@ -18,22 +18,34 @@ class OpenAiService(IOpenAiService):
         client.api_key = api_key
         self._client = client
 
-    def validate_question(self, question: str, existing_questions_json: str) -> str:
-        request_message = f'I have this question "{question}", I want to translate that to english, fix grammar errors, and check if this questions exists integraly or with similarities in this JSON "{existing_questions_json}", if exists in JSON (integraly or with similarities) just return string "Question already exists" and if doesnt exists in JSON just return the question that was translated and fixed. Important, only return the string not an analyse. Also if question doesnt make sense or if you doesnt has capcaity to do that return just "error"'
+    def validate_question(self, description: str, existing_questions_json: str) -> str:
+        if existing_questions_json is None:
+            existing_questions_json = "{}"
+        request_message = (
+            f'I have this description "{description}";'
+            'I want to translate that to english and fix grammar errors;'
+            f'Also check if this description exists integraly, have similarities or have represent the same description that descriptions in this JSON "{existing_questions_json}";'
+            'If exists integraly, have similarities or have represent the same description that descriptions in this JSON just return string "Description already exists" in field "error" in response JSON;'
+            'If does not just return the description that was translated and fixed as string in field "description" and "" (empty string) in field error in response JSON;'
+            'Also if the description is not a question with you response with "Yes" or "No" return string "Description is not a question" in field error in response JSON;'
+            'If you want to return anything that I do not describe here return a string with word "Error" in field "error" in response JSON.'
+        )
         response = self._client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
             messages=[
                 {"role": "user", "content": request_message}
-            ]
+            ],
+            response_format={"type": "json_object"},
         )
-        response_message = response.choices[0].message.content
-        if response_message.lower().find("question already exists") != -1:
-            raise ConflictError(f'question "{question}" already exists in database')
-        if response_message.lower().find("error") != -1:
-            err = ValueError(f"error to process question {question}")
+        response_message = response.choices[0].message.content.strip()
+        response_json = json.loads(response_message)
+        print("request", request_message)
+        print("response", response_json)
+        if response_json["error"].lower().find("description already exists") != -1:
+            raise ConflictError(f'description "{description}" already exists in database')
+        if response_json["error"].lower().find("description is not a question") != -1:
+            raise BadRequestError(f'description "{description}" sent that was not a question')
+        if response_json["error"].find("error") != -1:
+            err = ValueError(f"error to process description {description}")
             raise InternalServerError(err)
-        match = re.match(r'^"(.*)"$', response_message)
-        if match:
-            return match.group(1)
-        else:
-            return response_message
+        return response_json["description"]

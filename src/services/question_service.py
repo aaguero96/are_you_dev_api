@@ -22,7 +22,7 @@ class QuestionService(IQuestionService):
         new_question = self._openai_service.validate_question(question.description, existing_questions_json)
         is_question_exist = self._question_repository.is_question_exist(new_question)
         if is_question_exist:
-            raise ConflictError(f'question "{question}" already exists in database')
+            raise ConflictError(f'question "{question.description}" already exists in database')
         return self._question_repository.create(QuestionModel(
             description=new_question,
             adults_only=question.adults_only,
