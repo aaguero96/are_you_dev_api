@@ -64,13 +64,6 @@ class QuestionRepository(IQuestionRepository):
             """)
             query_params = {"description": description}
             response = self._session.execute(query, query_params).one()
-            print(description)
-            print(response[0])
-            print(type(response[0]))
-            print(response[0] == True)
-            print(response[0] == False)
-            print(response[0] == "true")
-            print(response[0] == "false")
             return response[0] == True
         except ValueError as err:
             raise err
