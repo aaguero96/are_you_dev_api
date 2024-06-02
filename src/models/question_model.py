@@ -8,7 +8,7 @@ class QuestionModel(BaseModel):
     __tablename__ = "questions"
 
     id: Mapped[UUID] = mapped_column(name="id", type_=UUID(as_uuid=True), primary_key=True, server_default=expression.func.uuid_generate_v4())
-    description: Mapped[str] = mapped_column(name="description", type_=String)
+    description: Mapped[str] = mapped_column(name="description", type_=String, unique=True)
     adults_only: Mapped[str] = mapped_column(name="adults_only", type_=Boolean)
     created_at: Mapped[DateTime] = mapped_column(name="created_at", type_=DateTime, server_default=expression.func.now())
     updated_at: Mapped[DateTime] = mapped_column(name="updated_at", type_=DateTime, server_default=expression.func.now())

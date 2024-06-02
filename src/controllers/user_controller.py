@@ -32,8 +32,9 @@ class UserController(IUserController):
             password=request.password,
             birthdate=request.birthdate,
         )
-        response = self._user_service.create(user)
-        return CreateUserResponseDTO(token=response)
+        res = self._user_service.create(user)
+        response.status_code = status.HTTP_201_CREATED
+        return CreateUserResponseDTO(token=res)
     
     def login(self, request: LoginRequestDTO, response: Response) -> LoginResponseDTO:
         if request.email == "" and request.username == "":
@@ -42,5 +43,6 @@ class UserController(IUserController):
         if request.email != "" and request.username != "":
             raise BadRequestError("too many info, inform just one email or username to login")
         
-        response = self._user_service.login(request.username, request.email, request.password)
-        return LoginResponseDTO(token=response)
+        res = self._user_service.login(request.username, request.email, request.password)
+        response.status_code = status.HTTP_200_OK
+        return LoginResponseDTO(token=res)
