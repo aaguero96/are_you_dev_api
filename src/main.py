@@ -5,6 +5,7 @@ from controllers import UserController, QuestionController
 from routes import UserRoute, SwaggerConfig, ErrorHandlerConfig, QuestionRoute
 from fastapi import FastAPI
 from external_services import OpenAiService
+from middlewares import AuthMiddleware
 import uvicorn
 
 
@@ -29,13 +30,16 @@ def main():
     user_service = UserService(user_repository, jwt_config)
     question_service = QuestionService(question_repository, openai_service)
 
+    # middlewares
+    auth_middleware = AuthMiddleware(jwt_config, user_repository)
+
     # controllers
     user_controller = UserController(user_service)
     question_controller = QuestionController(question_service)
 
     # routes
     user_route = UserRoute(user_controller)
-    question_route = QuestionRoute(question_controller)
+    question_route = QuestionRoute(question_controller, auth_middleware)
 
     # api
     app = FastAPI()

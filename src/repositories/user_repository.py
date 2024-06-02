@@ -4,6 +4,7 @@ from models import UserModel
 from sqlalchemy import select, insert
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from errors import NotFoundError, ConflictError
+from datetime import datetime
 
 
 class IUserRepository(ABC):
@@ -49,7 +50,7 @@ class UserRepository(IUserRepository):
     def get_by_username(self, username: str) -> UserModel:
         try:
             response = self._session.execute(
-                select(UserModel).where(UserModel.username == username)
+                select(UserModel).where(UserModel.username == username).where(UserModel.deleted_at.is_(None))
             ).one()
             return response[0]
         except NoResultFound as err:
@@ -58,7 +59,7 @@ class UserRepository(IUserRepository):
     def get_by_email(self, email: str) -> UserModel:
         try:
             response = self._session.execute(
-                select(UserModel).where(UserModel.email == email)
+                select(UserModel).where(UserModel.email == email).where(UserModel.deleted_at.is_(None))
             ).one()
             return response[0]
         except NoResultFound as err:
