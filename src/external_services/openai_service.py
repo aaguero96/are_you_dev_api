@@ -31,7 +31,7 @@ class OpenAiService(IOpenAiService):
             'If you want to return anything that I do not describe here return a string with word "Error" in field "error" in response JSON.'
         )
         response = self._client.chat.completions.create(
-            model="gpt-3.5-turbo-0125",
+            model="gpt-4o",
             messages=[
                 {"role": "user", "content": request_message}
             ],
