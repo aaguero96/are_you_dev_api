@@ -17,6 +17,10 @@ class IQuestionRepository(ABC):
     def get_all_json(self) -> str:
         pass
 
+    @abstractmethod
+    def is_question_exist(self, description: str) -> bool:
+        pass
+
 
 class QuestionRepository(IQuestionRepository):
     def __init__(self, database_config: IDatabaseConfig) -> None:
@@ -46,5 +50,27 @@ class QuestionRepository(IQuestionRepository):
                 """)
             response = self._session.execute(query).one()
             return str(response[0])
+        except ValueError as err:
+            raise err
+        
+    def is_question_exist(self, description: str) -> bool:
+        try:
+            query = text("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM questions
+                    WHERE description = :description
+                );  
+            """)
+            query_params = {"description": description}
+            response = self._session.execute(query, query_params).one()
+            print(description)
+            print(response[0])
+            print(type(response[0]))
+            print(response[0] == True)
+            print(response[0] == False)
+            print(response[0] == "true")
+            print(response[0] == "false")
+            return response[0] == True
         except ValueError as err:
             raise err

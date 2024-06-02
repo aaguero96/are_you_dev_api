@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from openai import OpenAI
 from infra import IEnvConfig
 from errors import ConflictError, InternalServerError
+import re
 
 
 class IOpenAiService(ABC):
@@ -26,11 +27,13 @@ class OpenAiService(IOpenAiService):
             ]
         )
         response_message = response.choices[0].message.content
-        print(request_message)
-        print(response_message)
-        if response_message.find("Question already exists") != -1:
+        if response_message.lower().find("question already exists") != -1:
             raise ConflictError(f'question "{question}" already exists in database')
-        if response_message.find("error") != -1:
+        if response_message.lower().find("error") != -1:
             err = ValueError(f"error to process question {question}")
             raise InternalServerError(err)
-        return response_message[1:-1]
+        match = re.match(r'^"(.*)"$', response_message)
+        if match:
+            return match.group(1)
+        else:
+            return response_message
