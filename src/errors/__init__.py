@@ -4,6 +4,7 @@ from .not_found_error import NotFoundError
 from .unauthorized_error import UnauthorizedError
 from .conflict_error import ConflictError
 from .internal_server_error import InternalServerError
+from .forbidden_error import ForbiddenError
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     'UnauthorizedError',
     'ConflictError',
     'InternalServerError',
+    'ForbiddenError',
 ]
