@@ -1,9 +1,10 @@
 from infra import DatabaseConfig, EnvConfig, JwtConfig
-from repositories import UserRepository
-from services import UserService
-from controllers import UserController
-from routes import UserRoute, SwaggerConfig, ErrorHandlerConfig
+from repositories import UserRepository, QuestionRepository
+from services import UserService, QuestionService
+from controllers import UserController, QuestionController
+from routes import UserRoute, SwaggerConfig, ErrorHandlerConfig, QuestionRoute
 from fastapi import FastAPI
+from external_services import OpenAiService
 import uvicorn
 
 
@@ -19,19 +20,27 @@ def main():
 
     # repositories
     user_repository = UserRepository(database_config)
+    question_repository = QuestionRepository(database_config)
+
+    # external services
+    openai_service = OpenAiService(env_config)
 
     # services
     user_service = UserService(user_repository, jwt_config)
+    question_service = QuestionService(question_repository, openai_service)
 
     # controllers
     user_controller = UserController(user_service)
+    question_controller = QuestionController(question_service)
 
     # routes
     user_route = UserRoute(user_controller)
+    question_route = QuestionRoute(question_controller)
 
     # api
     app = FastAPI()
     app.include_router(user_route.router)
+    app.include_router(question_route.router)
 
     # swagger
     swagger_config = SwaggerConfig(app)
